@@ -4,7 +4,14 @@ NB. note the filename needs to be boxed.
 NB. TODO: Having a tough time getting the files parsed by J itself. For now, just cutting the foiles and manually pasting in.
 
 example =. 1!:1 < 'example.txt'
-input =. |: _3 [\ _".(e.&(CR,LF,'x'))`(,:&' ')}1!:1 < 'input.txt'
+input =. ". ;._2 (1!:1 < 'input.txt')
+
+NB. Okay okay, found a way to parse.
+NB. ". parses strings into ints, and :. is cut. the _2 does TBA
+
+example =. ". ;._2 example
+
+NB. Note this requires the LAST character to be the delimeter, which is a newline at the end of the file.
 
 NB. inspired from jitwit's #1 solution
 
