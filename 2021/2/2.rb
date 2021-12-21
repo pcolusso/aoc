@@ -27,8 +27,6 @@ end
 def solve_2(input)
   x, y, a = 0, 0, 0
   input.each do |command, magnitude|
-    puts("x: #{x}, y: #{y}, a: #{a}")
-    puts("#{command} #{magnitude}")
     magnitude = magnitude.to_i
     case command
     when 'forward'
@@ -42,7 +40,6 @@ def solve_2(input)
       a -= magnitude
     end
   end
-  puts("x: #{x}, y: #{y}, a: #{a}")
   [x, y]
 end
 
@@ -53,8 +50,8 @@ problem_2_ans = solve_2(input)
 
 puts "Example 1: #{example_1_ans[0] * example_1_ans[1]}"
 
-puts "Answer 1: #{problem_1_ans[0] * problem_1_ans[1]}"
+puts "Answer  1: #{problem_1_ans[0] * problem_1_ans[1]}"
 
 puts "Example 2: #{example_2_ans[0] * example_2_ans[1]}"
 
-puts "Answer 1: #{problem_2_ans[0] * problem_2_ans[1]}"
+puts "Answer  1: #{problem_2_ans[0] * problem_2_ans[1]}"
