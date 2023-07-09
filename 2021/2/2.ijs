@@ -40,8 +40,8 @@ NB. ==Part 2==
 
 NB. Guess we could do the same we did in ruby, mix in an aim and then calculate.
 
-forward =. {{ (+y, 0) }} 
-up      =. {{ (0, -y) }} 
-down    =. {{ (0, +y) }} 
+forward =. {{ (+y, 0,  0) }} 
+up      =. {{ (0,  0, -y) }} 
+down    =. {{ (0,  0, +y) }} 
 
-exit''
+
