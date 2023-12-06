@@ -1,4 +1,5 @@
-s1 = """467..114..
+s1 = <<-INPUT
+467..114..
 ...*......
 ..35..633.
 ......#...
@@ -8,7 +9,7 @@ s1 = """467..114..
 ......755.
 ...$.*....
 .664.598..
-"""
+INPUT
 
 def is_num?(c)
   48 <= c.ord && c.ord <= 57
@@ -18,12 +19,9 @@ def is_period?(c)
   c == '.'
 end
 
-def accept?(c)
-  c.nil? || is_num?(c) || is_period?(c)
-end
-
-def reject?(c)
-  !accept?(c)
+def is_sym?(c)
+  return false if c.nil?
+  !is_num?(c) && !is_period?(c)
 end
 
 
@@ -48,9 +46,10 @@ def part1(input)
   check = lambda do |x, y|
     directions.each do |d|
       c = index_with_direction.call(d, x, y)
-      return false if reject?(c)
+      # puts "Checking @ #{x + d[0]}, #{y + d[1]} => '#{c}' is a symbol... #{is_sym?(c) ? '✅' : '🅱️}'} " 
+      return true if is_sym?(c)
     end
-    true
+    false 
   end
 
   values = []
@@ -59,29 +58,34 @@ def part1(input)
     number_literals = []
     # flag to indicate we're in a number
     parsing = false
-    bad_number = false
+    good_number = false
     line.chars.each_with_index do |c, x|
       if is_num?(c)
-        if check.call(x, y) # If we're still good, or starting a clean number, append the literal.
+        # Start parsing, if not already.
+        if !parsing
           parsing = true
-          number_literals << c
-        else
-          parsing = false
-          bad_number = true
-          number_literals = []
         end
+
+        # If we find a symbol, mark it as such
+        if !good_number && check.call(x, y)
+          good_number = true
+        end
+
+        number_literals << c
       else # We're at a period or symbol
-        if parsing && !bad_number
+        if parsing && good_number 
           values << number_literals.join.to_i
-          number_literals = []
         end
         parsing = false
-        bad_number = false
+        good_number = false
+        number_literals = []
       end
     end
+    if parsing && good_number
+      values << number_literals.join.to_i
+    end
   end
-  values
+  values.sum
 end
 
-# Y, then X, origin top right.
-p part1(s1)
+p part1(File.read("input.txt"))
