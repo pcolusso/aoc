@@ -26,32 +26,39 @@ def score_card(line)
   matches = drawn_numbers & winning_numbers
   score = (2 ** (matches.count - 1)).floor
   
-  puts "Card #{id} scored #{score}"
   score
 end
 
-def value_card(index, score, count, lines)
-  (index..score).map do |i|
-    new_count = count + 1
-    new_index = i + 1
-    line = lines[new_index]
-    score = score_card(line)
-    
-    if score.zero?
-      return count
-    else
-      return value_card(new_index, score, new_count, lines)
-    end
-  end.sum
+def process_card(cursor, lines, counts)
+  puts "Process card working on index #{cursor}"
+  # Define the base case
+  if cursor >= lines.count-1
+    return 
+  end
+  
+  line = lines[cursor]
+  score = score_card(line)
+
+  # If score is 0, the range will be empty, avoiding iteration.
+  (1..score).each do |x|
+    i = cursor + x
+    next if i >= lines.count # Janky fix, this loop should be better...
+    line = lines[i]
+    id =  line.match(/Card([0-9 ]*)\:/).captures.first.to_i
+    counts[id] += 1
+    process_card(i, lines, counts)
+  end
 end
 
 def part2(input)
   lines = input.split("\n")
+  counts = (1..lines.count).map { |x| [x, 1] }.to_h
 
-  lines.map.with_index do |line, index|
-    score = score_card(line)
-    value_card(index, score, 0, lines)
+  (0..lines.count-1).each do |i|
+    process_card(i, lines, counts)
   end
+
+  counts.values.sum
 end
 
-p part2 s1#File.read("input.txt") 
+p part2 File.read("input.txt") 
