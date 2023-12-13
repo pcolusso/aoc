@@ -29,36 +29,40 @@ def score_card(line)
   score
 end
 
-def process_card(cursor, lines, counts)
-  puts "Process card working on index #{cursor}"
-  # Define the base case
-  if cursor >= lines.count-1
-    return 
-  end
-  
-  line = lines[cursor]
-  score = score_card(line)
+Card = Struct.new(:id, :drawn, :winners, :score)
 
-  # If score is 0, the range will be empty, avoiding iteration.
-  (1..score).each do |x|
-    i = cursor + x
-    next if i >= lines.count # Janky fix, this loop should be better...
-    line = lines[i]
-    id =  line.match(/Card([0-9 ]*)\:/).captures.first.to_i
-    counts[id] += 1
-    process_card(i, lines, counts)
-  end
+def parse_card(line)
+  id =  line.match(/Card([0-9 ]*)\:/).captures.first.to_i
+  drawn_numbers = line.match(/\:([0-9 ]*)\|/).captures.first.split(" ").map(&:to_i)
+  winning_numbers = line.match(/\|([0-9 ]*)$/).captures.first.split(" ").map(&:to_i)
+  matches = drawn_numbers & winning_numbers
+  score = (2 ** (matches.count - 1)).floor
+  Card.new(id, drawn_numbers, winning_numbers, score)
 end
 
 def part2(input)
-  lines = input.split("\n")
-  counts = (1..lines.count).map { |x| [x, 1] }.to_h
+  initial_cards = input.split("\n").map { |l| parse_card(l) }
+  count = 0
+  queue = []
 
-  (0..lines.count-1).each do |i|
-    process_card(i, lines, counts)
+  initial_cards.each { |c| queue << c  }
+
+  while !queue.empty? do
+    card = queue.shift
+    index = card.id - 1
+    count += 1
+
+    if card.score > 0
+      (1..card.score).each do |x|
+        new_index = x + index
+        if (new_index < initial_cards.count)
+          queue.unshift(initial_cards[new_index])
+        end
+      end
+    end
   end
 
-  counts.values.sum
+  count
 end
 
 p part2 File.read("input.txt") 
