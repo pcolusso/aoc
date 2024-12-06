@@ -1,0 +1,4 @@
+[workspace]
+resolver = "2"
+
+members = [ "1/rs","aoc-shared-rs"]
