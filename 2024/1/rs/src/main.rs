@@ -29,8 +29,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for (x, y) in l.iter().zip(r.iter()) {
         acc += (x - y).abs();
     }
+    println!("Part 1: {}", acc);
 
-    println!("{}", acc);
+    acc = 0;
+    for lhs in l.iter() {
+        let count = r.iter().filter(|y| lhs == *y).count();
+        acc += *lhs * count as i32;
+    }
+
+    println!("Part 2: {}", acc);
 
     Ok(())
 }
