@@ -1,7 +1,5 @@
 use std::io::BufRead;
 
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let input = std::fs::read("../input.txt")?;
     let count = input.lines().count();
@@ -16,9 +14,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let y = y.parse::<i32>()?;
                 l.push(x);
                 r.push(y);
-
-            },
-            _ => panic!("Failed to parse input file")
+            }
+            _ => panic!("Failed to parse input file"),
         };
     }
 
