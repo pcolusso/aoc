@@ -67,9 +67,40 @@ impl Report {
     }
 
     fn almost_safe(&self) -> bool {
-        let all_increasing = self.levels.windows(2).allmost(|w| w[0] < w[1]);
-        let all_decreasing = self.levels.windows(2).allmost(|w| w[0] > w[1]);
-        let all_reasonable = self.levels.windows(2).map(|w| (w[0] - w[1]).abs()).allmost(|d| d >= 1 && d <= 3);
+        let mut all_increasing = true;
+        let mut all_decreasing = true;
+        let mut all_reasonable = true;
+        let mut mulligan = true;
+
+        for w in self.levels.windows(2) {
+            if w[0] < w[1] {
+                if !mulligan {
+                    all_decreasing = false;
+                } else {
+                     mulligan = false;
+                     continue;
+                }
+            }
+
+            if w[0] > w[1] {
+                if !mulligan {
+                    all_increasing = false;
+                } else {
+                    mulligan = false;
+                    continue;
+                }
+            }
+            let diff = (w[0] - w[1]).abs();
+
+            if !(diff >= 1 || diff <= 3) {
+                if !mulligan {
+                    all_reasonable = false;
+                } else {
+                    mulligan = false;
+                    continue;
+                }
+            }
+         }
 
         (all_increasing || all_decreasing) && all_reasonable
     }
@@ -134,5 +165,17 @@ mod tests {
             levels: vec![93, 90, 80, 92, 91],
         };
         assert!(!report.safe())
+    }
+
+    #[test]
+    fn bullshit() {
+        let report = Report { levels: vec!(1, 1, 2, 3, 4)};
+        assert!(report.almost_safe())
+    }
+
+    #[test]
+    fn more_bullshit() {
+        let report = Report { levels: vec![2, 5, 4, 3, 2]};
+        assert!(report.almost_safe())
     }
 }
