@@ -69,15 +69,33 @@ impl Report {
 
     // i think your approach here is fundamentally broken. A mulligan is not the same as removing an element.
     fn almost_safe(&self) -> bool {
-        let all_increasing = self.levels.windows(2).allmost(|w| w[0] < w[1]);
-        let all_decreasing = self.levels.windows(2).allmost(|w| w[0] > w[1]);
-        let all_reasonable = self
-            .levels
-            .windows(2)
-            .map(|w| (w[0] - w[1]).abs())
-            .allmost(|d| (1..=3).contains(&d));
+        let safe_already = self.safe();
 
-        (all_increasing || all_decreasing) && all_reasonable
+        if safe_already { return  true }
+
+        // redefining the function again, not sure why i went OO brained on this...
+        fn is_safe(arr: &[i8]) -> bool {
+            let all_increasing = arr.windows(2).all(|w| w[0] < w[1]);
+            let all_decreasing = arr.windows(2).all(|w| w[0] > w[1]);
+            let all_reasonable = arr
+                .windows(2)
+                .map(|w| (w[0] - w[1]).abs())
+                .all(|d| (1..=3).contains(&d));
+
+            (all_increasing || all_decreasing) && all_reasonable
+        }
+
+        // fuck it.
+        fn make_permutations(src: &Vec<i8>) -> Vec<Vec<i8>> {
+            (0..src.len()).map(|i| {
+                let mut copy = src.clone();
+                copy.remove(i);
+                copy
+            }).collect()
+        }
+
+        let permutations = make_permutations(&self.levels);
+        permutations.into_iter().any(|x| is_safe(&x))
     }
 }
 
