@@ -28,7 +28,7 @@ trait IteratorExt: Iterator {
 }
 
 use std::ops::ControlFlow;
-impl<T: Iterator> IteratorExt for T{
+impl<T: Iterator> IteratorExt for T {
     #[inline]
     // clever pun, yoinked from the source code for all
     fn allmost<F>(&mut self, f: F) -> bool
@@ -42,14 +42,11 @@ impl<T: Iterator> IteratorExt for T{
             move |(), x| {
                 if f(x) {
                     ControlFlow::Continue(())
+                } else if mulligan {
+                    mulligan = false;
+                    ControlFlow::Continue(())
                 } else {
-                    if mulligan {
-                        mulligan = false;
-                        ControlFlow::Continue(())
-                    } else {
-                        ControlFlow::Break(())
-                    }
-
+                    ControlFlow::Break(())
                 }
             }
         }
@@ -61,46 +58,24 @@ impl Report {
     fn safe(&self) -> bool {
         let all_increasing = self.levels.windows(2).all(|w| w[0] < w[1]);
         let all_decreasing = self.levels.windows(2).all(|w| w[0] > w[1]);
-        let all_reasonable = self.levels.windows(2).map(|w| (w[0] - w[1]).abs()).all(|d| d >= 1 && d <= 3);
+        let all_reasonable = self
+            .levels
+            .windows(2)
+            .map(|w| (w[0] - w[1]).abs())
+            .all(|d| (1..=3).contains(&d));
 
         (all_increasing || all_decreasing) && all_reasonable
     }
 
+    // i think your approach here is fundamentally broken. A mulligan is not the same as removing an element.
     fn almost_safe(&self) -> bool {
-        let mut all_increasing = true;
-        let mut all_decreasing = true;
-        let mut all_reasonable = true;
-        let mut mulligan = true;
-
-        for w in self.levels.windows(2) {
-            if w[0] < w[1] {
-                if !mulligan {
-                    all_decreasing = false;
-                } else {
-                     mulligan = false;
-                     continue;
-                }
-            }
-
-            if w[0] > w[1] {
-                if !mulligan {
-                    all_increasing = false;
-                } else {
-                    mulligan = false;
-                    continue;
-                }
-            }
-            let diff = (w[0] - w[1]).abs();
-
-            if !(diff >= 1 || diff <= 3) {
-                if !mulligan {
-                    all_reasonable = false;
-                } else {
-                    mulligan = false;
-                    continue;
-                }
-            }
-         }
+        let all_increasing = self.levels.windows(2).allmost(|w| w[0] < w[1]);
+        let all_decreasing = self.levels.windows(2).allmost(|w| w[0] > w[1]);
+        let all_reasonable = self
+            .levels
+            .windows(2)
+            .map(|w| (w[0] - w[1]).abs())
+            .allmost(|d| (1..=3).contains(&d));
 
         (all_increasing || all_decreasing) && all_reasonable
     }
@@ -115,14 +90,14 @@ fn main() -> Result<()> {
 
     let step_one = reports
         .iter()
-        .filter_map(|r| r.safe().then(|| true))
+        .filter_map(|r| r.safe().then_some(true))
         .count();
 
     println!("Step 1: {}", step_one);
 
     let step_two = reports
         .iter()
-        .filter_map(|r| r.almost_safe().then(|| true))
+        .filter_map(|r| r.almost_safe().then_some(true))
         .count();
 
     println!("Step 2: {}", step_two);
@@ -132,31 +107,17 @@ fn main() -> Result<()> {
 
 #[cfg(test)]
 mod tests {
+    use std::vec;
+
     use super::*;
-
+    
     #[test]
-    fn all_ascending_safe() {
-        let report = Report {
-            levels: vec![1, 4, 8, 12, 48],
-        };
-        assert!(report.safe())
-    }
+    fn safe_with_removals() {
+        let report = Report { levels: vec![1, 3, 2, 4, 5]}.almost_safe();
+        let report2 = Report { levels: vec![8, 6, 4, 4, 1] }.almost_safe();
 
-    #[test]
-    fn all_descending_safe() {
-        let report = Report {
-            levels: vec![92, 91, 90, 89, 70],
-        };
-        assert!(report.safe())
-    }
-
-    // See, writing a test made it clear I didn't fully understand the third requirement!
-    #[test]
-    fn reasonable_step_safe() {
-        let report = Report {
-            levels: vec![93, 90, 93, 92, 91],
-        };
-        assert!(report.safe())
+        assert!(report);
+        assert!(report2);
     }
 
     #[test]
@@ -168,14 +129,41 @@ mod tests {
     }
 
     #[test]
+    fn unsafe_even_with_removals() {
+        let report = Report {
+            levels: vec![1, 2, 7, 8, 9],
+        };
+        let is_safe = report.almost_safe();
+        assert!(!is_safe);
+
+
+        let report = Report {
+            levels: vec![9, 7, 6, 2, 1],
+        };
+        let is_safe = report.almost_safe();
+        assert!(!is_safe);
+    }
+
+    #[test]
     fn bullshit() {
-        let report = Report { levels: vec!(1, 1, 2, 3, 4)};
-        assert!(report.almost_safe())
+        let report = Report {
+            levels: vec![1, 1, 2, 3, 4],
+        };
+        let is_safe = report.almost_safe();
+        assert!(!is_safe);
     }
 
     #[test]
     fn more_bullshit() {
-        let report = Report { levels: vec![2, 5, 4, 3, 2]};
+        let report = Report {
+            levels: vec![2, 5, 4, 3, 2],
+        };
         assert!(report.almost_safe())
+    }
+
+    #[test]
+    fn test_allmost() {
+        let all_fives = [5, 5, 3, 5, 5];
+        assert!(all_fives.iter().allmost(|n| *n == 5));
     }
 }
