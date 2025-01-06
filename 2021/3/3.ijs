@@ -1,0 +1,1 @@
+example =. '1'&= 'm' fread 'example.txt'

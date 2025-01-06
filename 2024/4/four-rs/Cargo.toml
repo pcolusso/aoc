@@ -1,0 +1,10 @@
+[package]
+name = "four-rs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.95"
+aoc-shared-rs = { path = "../../aoc-shared-rs" }
+tuple_swizzle = "1"
+glam = "0.29"

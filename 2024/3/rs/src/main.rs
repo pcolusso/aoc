@@ -31,6 +31,10 @@ fn parse_many_mul(input: &str) -> IResult<&str, Vec<Mul>> {
     )(input)
 }
 
+fn parse_many_mul_2(input: &str) -> Vec<Mul> {
+    todo!()
+}
+
 fn main() -> Result<()> {
     //let input = std::fs::read("../input.txt")?;
 
