@@ -4,7 +4,7 @@ pub fn add(left: u64, right: u64) -> u64 {
     left + right
 }
 
-pub fn decode(path: impl AsRef<Path>) -> Result<String, std::io::Error> {
+pub fn decode(path: impl AsRef<Path>) -> Result<Vec<u8>, std::io::Error> {
     let cipher = b"HOHOHO";
     let mut f = File::open(path)?;
     let mut b = Vec::new();
@@ -13,8 +13,7 @@ pub fn decode(path: impl AsRef<Path>) -> Result<String, std::io::Error> {
         .enumerate()
         .for_each(|(i, byte)| *byte ^= cipher[i % cipher.len()]);
 
-    let s = String::from_utf8(b).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
-    Ok(s)
+    Ok(b)
 }
 
 #[cfg(test)]

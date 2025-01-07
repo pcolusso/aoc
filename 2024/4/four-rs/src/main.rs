@@ -1,4 +1,5 @@
-use std::collections::HashSet;
+use std::fmt::format;
+
 use anyhow::Result;
 use aoc_shared_rs::decode;
 use glam::IVec2;
@@ -29,11 +30,15 @@ struct Run<'a>(
 
 impl<'a> Run<'a> {
     fn is_xmas(&self) -> bool {
-        if let Some('X') = self.0 {
-            if let Some('M') = self.1 {
-                if let Some('A') = self.2 {
-                    if let Some('S') = self.3 {
-                        return true;
+        // what the fuck lmao
+        if let Some(x) = self.0 {
+            if let Some(m) = self.1 {
+                if let Some(a) = self.2 {
+                    if let Some(s) = self.3 {
+                        let stmt = format!("{}{}{}{}", x, m, a, s);
+                        if stmt.chars().rev().collect::<String>() == "XMAS" || stmt == "XMAS" {
+                            return true
+                        }
                     }
                 }
             }
@@ -131,11 +136,14 @@ fn stage_one(input: String) -> usize {
     count
 }
 
+
+// Read some hints, seem a lot of people are using kernels, that coluld be fun to try and impl?
+// Also, a lot are also searching for SAMX too...
 fn main() -> Result<()> {
     let input = decode("../input.enc")?;
+    let input = String::from_utf8(input).expect("bad decode").replace("\n", "");
 
-
-    print!("{}", input);
+    println!("Stage 1: {}", stage_one(input));
     Ok(())
 }
 
@@ -155,30 +163,8 @@ MAMMMXMMMM
 MXMXAXMASX";
 
     #[test]
-    fn test_input() {
-        let input = decode("../input.enc").expect("Can't find input");
-        let grid = Grid::new(&input);
-        let x = grid.get(&Coord { x: 46, y: 0 });
-        let m = grid.get(&Coord { x: 13, y: 1 });
-        let a = grid.get(&Coord { x: 13, y: 4 });
-        let s = grid.get(&Coord { x: 42, y: 43 });
-        assert_eq!(x.unwrap(), &'X');
-        assert_eq!(m.unwrap(), &'M');
-        assert_eq!(a.unwrap(), &'A');
-        assert_eq!(s.unwrap(), &'S');
-        let run = Run(x, m, a, s);
-        assert!(run.is_xmas());
-    }
-
-    #[test]
     fn test_case() {
         let output = stage_one(SAMPLE.to_owned());
         assert_eq!(output, 18);
-
-    }
-
-    #[test]
-    fn grid_construction_is_sound() {
-
     }
 }
